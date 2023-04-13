@@ -1,0 +1,40 @@
+
+
+#############################################################################
+
+					INCLUDING THE WATER MASS FRACTION
+		
+#############################################################################
+
+This version of EFPrebound allows water tracking through the extra parameter
+ 'wf' (water fraction). This is made possible by ReboundX, with the extra
+ parameter 'wf' included. Therefore, these requirements must be satisfied
+ before being able to run EFPrebound.
+ 
+1) Download ReboundX by cloning the repository from GitHub by command line
+	>>> git clone https://github.com/dtamayo/reboundx.git
+2) Add the extra parameter 'wf' in the file reboundx-master/src/core.c in
+    "void rebx_register_default_params(struct rebx_extras* rebx){}" by adding
+	  "rebx_register_param(rebx, "wf", REBX_TYPE_DOUBLE);"
+3) Compile ReboundX
+	>>> pip install -e ./
+
+
+#############################################################################
+
+					INCLUDING THE CODE
+		
+#############################################################################
+
+This version of EFPrebound allows water tracking through the extra parameter
+ 'wf' (water fraction). This is made possible by ReboundX, with the extra
+ parameter 'wf' included. Therefore, these requirements must be satisfied
+ before being able to run EFPrebound.
+ 
+1) Download ReboundX by cloning the repository from GitHub by command line
+	>>> git clone https://github.com/dtamayo/reboundx.git
+2) Add the extra parameter 'wf' in the file reboundx-master/src/core.c in
+    "void rebx_register_default_params(struct rebx_extras* rebx){}" by adding
+	  "rebx_register_param(rebx, "code", REBX_TYPE_DOUBLE);"
+3) Compile ReboundX
+	>>> pip install -e ./

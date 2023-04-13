@@ -17,6 +17,6 @@ NYUAD's code of conduct can be found at the following link: [https://www.nyu.edu
 We expect all contributors and users to abide by NYUAD's code of conduct as well as the code of conduct outlined in this project. Any violations of either code of conduct will not be tolerated. The project team reserves the right to take appropriate action, including but not limited to removing contributors, in order to maintain a welcoming and inclusive environment.
 
 ## License
-Under the current status of the project, it is still in a preliminary phase, and no license has been applied to it yet. The work is funded by NYUAD, and the author owns the project authorship.
+Under the current status of the project, it is still in a preliminary phase, and no license has been applied to it yet. The work is funded by Tamkeen under the NYU Abu Dhabi Research Institute grants CG003 and G1502, and the author owns the project authorship.
 
 Any use or distribution of the project's content, including but not limited to code, data, and documentation, is strictly prohibited without prior written consent from the author.

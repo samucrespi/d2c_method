@@ -15,8 +15,8 @@ The debris are then clustered in 3D velocity-space using a k-mean clustering alg
 ## Benefits
 This methodology is more efficient than including all the post-collisional debris, reducing computational costs and allowing for more realistic simulations of terrestrial planet formation. It also provides a way to account for the effects of post-collisional debris without compromising the accuracy of the simulation.
 
-## Usage
-To use this methodology, please refer to the documentation provided in this repository. The documentation provides step-by-step instructions for implementation.
+## Usage [TO DO]
+To use this methodology, please refer to the documentation provided in this repository. The documentation provides step-by-step instructions for implementation. 
 
 ## Contributions
 Contributions to this repository are welcome. Please refer to the contribution guidelines provided in this repository.
