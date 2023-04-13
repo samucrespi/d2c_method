@@ -6,10 +6,10 @@
 		
 #############################################################################
 
-This version of EFPrebound allows water tracking through the extra parameter
+This version of D2C_Rebound allows water tracking through the extra parameter
  'wf' (water fraction). This is made possible by ReboundX, with the extra
  parameter 'wf' included. Therefore, these requirements must be satisfied
- before being able to run EFPrebound.
+ before being able to run D2C_Rebound.
  
 1) Download ReboundX by cloning the repository from GitHub by command line
 	>>> git clone https://github.com/dtamayo/reboundx.git
@@ -26,10 +26,10 @@ This version of EFPrebound allows water tracking through the extra parameter
 		
 #############################################################################
 
-This version of EFPrebound allows water tracking through the extra parameter
- 'wf' (water fraction). This is made possible by ReboundX, with the extra
+This version of D2C_Rebound allows particle tracking through the extra
+ parameter 'code'. This is made possible by ReboundX, with the extra
  parameter 'wf' included. Therefore, these requirements must be satisfied
- before being able to run EFPrebound.
+ before being able to run D2C_Rebound.
  
 1) Download ReboundX by cloning the repository from GitHub by command line
 	>>> git clone https://github.com/dtamayo/reboundx.git
