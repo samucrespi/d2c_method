@@ -3,7 +3,7 @@
 #
 # D2C_Rebound.py
 # By S. Crespi, Apr 2023
-# Version 1.7
+# Version 1.10
 #
 # This algorithm integrates forming planetary system by assuming 
 #  fragmentation during collisions (through interpolation of the
@@ -43,6 +43,9 @@
 #			with only difference being the use of cartesian coordinates
 #  - v1.6: the "rmv" file has been modified into a "events" file
 #  - v1.7: fixed bug in water_conservation for dry impact
+#  - v1.8: fixed time and mass units in the "events" file
+#  - v1.9: fixed bug for event file with event without outcome
+#  - v1.10: fixed label order after collision
 #
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
@@ -144,41 +147,44 @@ class SPHcol:
 def collision_solver(sim_pointer, collision):
 	sim = sim_pointer.contents
 	
-	# get collision parameters
+	# get colliding particles
 	p1,p2=ps[collision.p1],ps[collision.p2]
-
-	# write event
-	write_events_file(sim.t,'collision',p1,p2)
 
 	# collider labels
 	collider_labels = [code_to_label(p1.params['code']),code_to_label(p2.params['code'])]
 	
 	# collision with Sun t,ty,p1,p2,outcome
 	if collision.p1==0:
+		write_events_file(sim.t,'collision',p1,p2)
 		ps[0].m+=p2.m
 		write_events_file_outcome([ps[0]])
 		return 2
 	if collision.p2==0:
+		write_events_file(sim.t,'collision',p1,p2)
 		ps[0].m+=p1.m
 		write_events_file_outcome([ps[0]])
 		return 1
 
 	# collision with Gas Giants
 	if collision.p1<=NGG:
+		write_events_file(sim.t,'collision',p1,p2)
 		merge(p1,p2)
 		write_events_file_outcome([p1])
 		return 2
 	if collision.p2<=NGG:
+		write_events_file(sim.t,'collision',p1,p2)
 		merge(p2,p1)
 		write_events_file_outcome([p2])
 		return 1
 	
 	# collision with Debris
 	if collision.p2>=sim.N_active:
+		write_events_file(sim.t,'collision',p1,p2)
 		merge(p1,p2)
 		write_events_file_outcome([p1])
 		return 2
 	if collision.p1>=sim.N_active:
+		write_events_file(sim.t,'collision',p1,p2)
 		merge(p2,p1)
 		write_events_file_outcome([p2])
 		return 1	
@@ -191,8 +197,9 @@ def collision_solver(sim_pointer, collision):
 	indeces=[collision.p1,collision.p2]	
 	coll_p=get_coll_params(p1,p2)
 	
-	# save snapshot at the collision time
+	# save snapshot at the collision time and event file
 	collision_snapshot(ps)
+	write_events_file(sim.t,'collision',p1,p2)
 	
 	#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 	print('\n{}'.format('-'*80))
@@ -216,6 +223,10 @@ def collision_solver(sim_pointer, collision):
 	rcol=np.sqrt(xCoM.dot(xCoM))
 	thcol=np.arctan2(xCoM[1],xCoM[0])		# coll point projected angle on the x-y plane
 	inccol=np.pi/2.-np.arccos(xCoM[2]/rcol)	# coll point "inclination"
+
+	# check mass order
+	p1_lt_p2=True
+	if m2>m1: p1_lt_p2=False
 
 	# interpolate SPH table and find the 2 largest bodies
 	largest = interpolate_SPHtable(coll_p)
@@ -539,6 +550,18 @@ def collision_solver(sim_pointer, collision):
 		sim.particles[indeces[i]].m=survivors[i][2]
 		sim.particles[indeces[i]].params['wf']=survivors[i][3]
 		sim.particles[indeces[i]].r=get_radius(survivors[i][2],survivors[i][3])
+	
+	# for single survivor duplicate the particle
+	if Nbig==1:
+		sim.particles[indeces[1]].x=sim.particles[indeces[0]].x
+		sim.particles[indeces[1]].y=sim.particles[indeces[0]].y
+		sim.particles[indeces[1]].z=sim.particles[indeces[0]].z
+		sim.particles[indeces[1]].vx=sim.particles[indeces[0]].vx
+		sim.particles[indeces[1]].vy=sim.particles[indeces[0]].vy
+		sim.particles[indeces[1]].vz=sim.particles[indeces[0]].vz
+		sim.particles[indeces[1]].m=sim.particles[indeces[0]].m
+		sim.particles[indeces[1]].params['wf']=sim.particles[indeces[0]].params['wf']
+		sim.particles[indeces[1]].r=sim.particles[indeces[0]].r	
 		
 	# add Debris
 	Nps=sim.N
@@ -587,9 +610,10 @@ def collision_solver(sim_pointer, collision):
 	if save_collision_outcome: save_col_out(sim.t,Nbig,Nfr,mfr,wffr)
 	
 	if Nbig==0: return 3
-	if Nbig==1: return 2	
+	if Nbig==1: 
+		if not p1_lt_p2: return 1
+		else: return 2
 	if Nbig==2: return 0
-	
 
 def merge(pa,pb):
 	# merge the second body into the first one
@@ -1391,17 +1415,17 @@ def write_events_file(t,ty,p1,p2):
 	with open(events_file,'a+') as f: 
 		f.write('-'*50+'\n')
 		f.write('TYPE: {}\n'.format(ty))
-		f.write('TIME: {}\n'.format(t))
-		f.write('INVOLVED PARTICLES  (label, mass [MSUN], wf [%])\n')
-		f.write('{}\t{}\t{}\n'.format(code_to_label(p1.params['code']),p1.m,p1.params['wf']))
-		if not p2==[]: f.write('{}\t{}\t{}\n'.format(code_to_label(p2.params['code']),p2.m,p2.params['wf']))
+		f.write('TIME: {} yr\n'.format(t/2./np.pi))
+		f.write('INVOLVED PARTICLES  (label, mass [MEAR], wf [%])\n')
+		f.write('{}\t{}\t{}\n'.format(code_to_label(p1.params['code']),p1.m/MEAR,p1.params['wf']))
+		if not p2==[]: f.write('{}\t{}\t{}\n'.format(code_to_label(p2.params['code']),p2.m/MEAR,p2.params['wf']))
 		else: f.write('-\t-\t-\n')
 
 def write_events_file_outcome(outcome):
 	with open(events_file,'a+') as f: 
-		f.write('RESULTING PARTICLES  (label, mass [MSUN], wf [%])\n')
+		f.write('RESULTING PARTICLES  (label, mass [MEAR], wf [%])\n')
 		if not outcome==[]:
-			for p in outcome: f.write('{}\t{}\t{}\n'.format(code_to_label(p.params['code']),p.m,p.params['wf']))
+			for p in outcome: f.write('{}\t{}\t{}\n'.format(code_to_label(p.params['code']),p.m/MEAR,p.params['wf']))
 		else: f.write('-\t-\t-\n')
 	
 def collision_snapshot(ps):
