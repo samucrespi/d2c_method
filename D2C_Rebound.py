@@ -3,7 +3,7 @@
 #
 # D2C_Rebound.py
 # By S. Crespi, Apr 2023
-# Version 1.10
+# Version 1.12
 #
 # This algorithm integrates forming planetary system by assuming 
 #  fragmentation during collisions (through interpolation of the
@@ -46,6 +46,9 @@
 #  - v1.8: fixed time and mass units in the "events" file
 #  - v1.9: fixed bug for event file with event without outcome
 #  - v1.10: fixed label order after collision
+#  - v1.11: now the snapshot file can be used to start a new simulation
+#            without permorming any adaptation
+#  - v1.12: avoided the bug with "return 1" and "return 2"
 #
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
@@ -225,8 +228,8 @@ def collision_solver(sim_pointer, collision):
 	inccol=np.pi/2.-np.arccos(xCoM[2]/rcol)	# coll point "inclination"
 
 	# check mass order
-	p1_lt_p2=True
-	if m2>m1: p1_lt_p2=False
+	p1_lt_p2=False
+	if m1<m2: p1_lt_p2=True
 
 	# interpolate SPH table and find the 2 largest bodies
 	largest = interpolate_SPHtable(coll_p)
@@ -551,17 +554,8 @@ def collision_solver(sim_pointer, collision):
 		sim.particles[indeces[i]].params['wf']=survivors[i][3]
 		sim.particles[indeces[i]].r=get_radius(survivors[i][2],survivors[i][3])
 	
-	# for single survivor duplicate the particle
-	if Nbig==1:
-		sim.particles[indeces[1]].x=sim.particles[indeces[0]].x
-		sim.particles[indeces[1]].y=sim.particles[indeces[0]].y
-		sim.particles[indeces[1]].z=sim.particles[indeces[0]].z
-		sim.particles[indeces[1]].vx=sim.particles[indeces[0]].vx
-		sim.particles[indeces[1]].vy=sim.particles[indeces[0]].vy
-		sim.particles[indeces[1]].vz=sim.particles[indeces[0]].vz
-		sim.particles[indeces[1]].m=sim.particles[indeces[0]].m
-		sim.particles[indeces[1]].params['wf']=sim.particles[indeces[0]].params['wf']
-		sim.particles[indeces[1]].r=sim.particles[indeces[0]].r	
+	# use the label of the bigger particle
+	if Nbig==1 and p1_lt_p2: sim.particles[indeces[0]].params['code']=sim.particles[indeces[1]].params['code']
 		
 	# add Debris
 	Nps=sim.N
@@ -610,9 +604,7 @@ def collision_solver(sim_pointer, collision):
 	if save_collision_outcome: save_col_out(sim.t,Nbig,Nfr,mfr,wffr)
 	
 	if Nbig==0: return 3
-	if Nbig==1: 
-		if not p1_lt_p2: return 1
-		else: return 2
+	if Nbig==1: return 2
 	if Nbig==2: return 0
 
 def merge(pa,pb):
@@ -1531,7 +1523,7 @@ sim.testparticle_type = 1
 starting_file = '{}/{}.{}'.format(scenario,scenario,t0)
 
 start=np.loadtxt(starting_file,usecols=np.arange(0,9))
-hs=np.loadtxt(starting_file,usecols=10,dtype=str)
+hs=np.loadtxt(starting_file,usecols=-1,dtype=str)
 
 # --- Sun
 sim.add(m=start[0,0],r=start[0,1])
@@ -1545,7 +1537,7 @@ for i in range(1,len(start)):
 	sim.particles[i].params['code']=label_to_code(hs[i])
 
 # --- Active Particles
-sim.N_active=sum(np.loadtxt(starting_file,usecols=9,dtype=int))
+sim.N_active=sum(np.loadtxt(starting_file,usecols=-2,dtype=int))
 
 ps = sim.particles
 sim.move_to_com()
