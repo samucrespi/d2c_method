@@ -3,7 +3,7 @@
 #
 # D2C_Rebound.py
 # By S. Crespi, Apr 2023
-# Version 1.12
+# Version 1.14
 #
 # This algorithm integrates forming planetary system by assuming 
 #  fragmentation during collisions (through interpolation of the
@@ -49,6 +49,8 @@
 #  - v1.11: now the snapshot file can be used to start a new simulation
 #            without permorming any adaptation
 #  - v1.12: avoided the bug with "return 1" and "return 2"
+#  - v1.13: bug fixed in remove_ps() 
+#  - v1.14: bug fixed in SPHcol.all
 #
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
@@ -134,6 +136,7 @@ class SPHcol:
 				str_id=str(self.id)
 				while len(str_id)<3: str_id='0'+str_id
 				self.all=np.loadtxt('SPHDebris_catalogue/{}_{}.dat'.format(str_id,self.code)) # x,y,z,vx,vy,vz,m,m/mtot,wf [in Rebound units]
+				if np.ndim(self.all)==1: self.all = np.asarray([self.all])
 			except: pass
 		
 		# Perfect Merging
@@ -1323,7 +1326,7 @@ def get_index_from_code(code):
 #-------------------
 
 def remove_ps():
-    for i in reversed(range(NGG,sim.N)):
+    for i in reversed(range(NGG+1,sim.N)):
         pa,pe=ps[i].a,ps[i].e
         # unbound particles
         if pe>=1.:
