@@ -3,7 +3,7 @@
 #
 # D2C_Rebound.py
 # By S. Crespi, Apr 2023
-# Version 1.14
+# Version 1.15
 #
 # This algorithm integrates forming planetary system by assuming 
 #  fragmentation during collisions (through interpolation of the
@@ -31,8 +31,16 @@
 #
 # It is based on SMD_Rebound.py v1.3
 #
-# NB: all the units are in "rebound" units (G=1) except where otherwise
-#     specified
+# Note: all the units are in "rebound" units (G=1) except where
+#  otherwise specified
+#
+# Requirements:
+#  - ReboundX with "wf" and "code" parameters added (see
+# 		"important_before_running.txt")
+#  - CONSTANTS.py in the same folder of this file
+#  - SPH.table in the same folder of this file
+#  - SPHDebris_catalogue folder in the same folder of this file
+#  - a file containing the bidies to integrate in the "scenario" folder
 #
 # Version note:
 #  - v1.1: fixed issue with open(file)
@@ -51,6 +59,7 @@
 #  - v1.12: avoided the bug with "return 1" and "return 2"
 #  - v1.13: bug fixed in remove_ps() 
 #  - v1.14: bug fixed in SPHcol.all
+#  - v1.15: bug fixed in angle_SPH_Rebound() for 2D-starting sim.s
 #
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
@@ -697,6 +706,7 @@ def angle_SPH_Rebound(l1,l2,R1,R2):
 	#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 	all_steps_plot=False
 	if all_steps_plot:
+		import matplotlib.pyplot as plt
 		fig, axs = plt.subplots(3,4,figsize=[16,9])
 		dt=1.e-3
 		c=['r','b']
@@ -788,7 +798,9 @@ def angle_SPH_Rebound(l1,l2,R1,R2):
 	
 	# rotate the system so that h=[0,0,+h]
 	h=np.cross(r0,v0)
-	phi=np.arccos(h[0]/np.sqrt(h[0]*h[0]+h[1]*h[1]))
+	phi_norm2=h[0]*h[0]+h[1]*h[1]
+	if phi_norm2!=0: phi=np.arccos(h[0]/np.sqrt(phi_norm2))
+	else: phi=0.
 	th=np.arccos(h[2]/np.sqrt(h.dot(h)))
 	
 	r0=Ry(Rz(r0,-phi),-th)
