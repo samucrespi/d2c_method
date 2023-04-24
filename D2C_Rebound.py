@@ -554,6 +554,19 @@ def collision_solver(sim_pointer, collision):
 		sim.particles[indeces[i]].params['wf']=survivors[i][3]
 		sim.particles[indeces[i]].r=get_radius(survivors[i][2],survivors[i][3])
 	
+	# for single survivor duplicate the particle 
+	#   (this is actualy redundant but Rebound is doing something wrong with "Return 1" and "Return 2")
+	if Nbig==1:
+		sim.particles[indeces[1]].x=sim.particles[indeces[0]].x
+		sim.particles[indeces[1]].y=sim.particles[indeces[0]].y
+		sim.particles[indeces[1]].z=sim.particles[indeces[0]].z
+		sim.particles[indeces[1]].vx=sim.particles[indeces[0]].vx
+		sim.particles[indeces[1]].vy=sim.particles[indeces[0]].vy
+		sim.particles[indeces[1]].vz=sim.particles[indeces[0]].vz
+		sim.particles[indeces[1]].m=sim.particles[indeces[0]].m
+		sim.particles[indeces[1]].params['wf']=sim.particles[indeces[0]].params['wf']
+		sim.particles[indeces[1]].r=sim.particles[indeces[0]].r	
+
 	# use the label of the bigger particle
 	if Nbig==1 and p1_lt_p2: sim.particles[indeces[0]].params['code']=sim.particles[indeces[1]].params['code']
 		
