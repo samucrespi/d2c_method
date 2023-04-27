@@ -1365,7 +1365,7 @@ def remove_ps():
             write_events_file_outcome([ps[0]])
             continue
         if pa*(1.-pe)<0.03:
-            write_events_file(sim.t,'merged_into_Sun -> perihelion>12.',ps[0],ps[i])
+            write_events_file(sim.t,'merged_into_Sun -> perihelion<0.03',ps[0],ps[i])
             ps[0].m+=ps[i].m
             sim.remove(i)
             write_events_file_outcome([ps[0]])
